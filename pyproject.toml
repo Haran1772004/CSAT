@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "csat-backend"
+version = "0.1.0"
+description = "Multi-tenant CSAT (Customer Satisfaction) system backend"
+authors = ["Admin <admin@example.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+sqlalchemy = "^2.0.25"
+pymysql = "^1.1.0"
+alembic = "^1.13.1"
+pydantic = {extras = ["email"], version = "^2.5.3"}
+pydantic-settings = "^2.1.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.6"
+boto3 = "^1.34.14"
+slowapi = "^0.1.9"  # For rate limiting
+loguru = "^0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.1.1"
+isort = "^5.13.2"
+mypy = "^1.8.0"
+httpx = "^0.26.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
