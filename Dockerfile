@@ -1,47 +1,38 @@
-# Dockerfile
+# Stage 1: Builder
 FROM python:3.10-slim as builder
-
 WORKDIR /app
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
+# We install poetry here just to get the packages
 RUN pip install poetry
-
-# Copy only dependency files configuration to cache them in docker layer
-COPY pyproject.toml poetry.lock* /app/
-
-# Configure poetry to create virtualenv in the project directory
 RUN poetry config virtualenvs.create false
-
-# Install dependencies
+COPY pyproject.toml poetry.lock* /app/
 RUN poetry install --no-interaction --no-ansi --no-root
 
-# Final stage
+# Stage 2: Final
 FROM python:3.10-slim
-
 WORKDIR /app
 
-# Install database dependencies
 RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy installed python dependencies from builder
+# 1. Copy the packages from the builder
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
+# 2. IMPORTANT: You MUST install poetry in this final stage too 
+# so 'docker compose exec app poetry run' actually works!
+RUN pip install poetry
+RUN poetry config virtualenvs.create false
+
 COPY . /app
-
-# Expose port
-EXPOSE 8000
-
-# Copy startup script
 COPY ./scripts/start.sh /start.sh
 RUN chmod +x /start.sh
 
+EXPOSE 8000
 CMD ["/start.sh"]

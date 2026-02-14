@@ -20,6 +20,7 @@ services:
   db:
     image: mysql:8.0
     container_name: csat_db
+    command: --innodb-adaptive-hash-index=0 --innodb-buffer-pool-size=256M
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword

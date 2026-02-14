@@ -34,14 +34,20 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Navigate to project directory
-            cd CSAT
+            # 1. Enter the directory
+            cd ~/CSAT
             
-            # Pull latest changes
+            # 2. Pull the latest code (includes your Dockerfile/Compose fixes)
             git pull origin main
             
-            # Rebuild and restart containers
+            # 3. Build and restart in detached mode
             docker compose up -d --build
             
-            # Run database migrations
-            docker compose exec app alembic upgrade head
+            # 4. Wait for MySQL to finish initializing (prevents Alembic hang)
+            echo "Waiting 20 seconds for MySQL to be ready for connections..."
+            sleep 20
+            
+            # 5. Run migrations
+            # -T: disables TTY (required for CI/CD)
+            # poetry run: ensures correct environment usage
+            docker compose exec -T app poetry run alembic upgrade head
