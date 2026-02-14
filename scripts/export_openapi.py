@@ -14,7 +14,9 @@ os.environ.setdefault("SECRET_KEY", "dummy_secret_key_for_export")
 os.environ.setdefault("S3_BUCKET_NAME", "dummy_bucket")
 
 from fastapi.openapi.utils import get_openapi
+
 from app.main import app
+
 
 def export_openapi():
     # Generate the OpenAPI schema

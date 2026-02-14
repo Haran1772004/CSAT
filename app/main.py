@@ -1,4 +1,5 @@
 import bcrypt
+
 # Passlib 1.7.4 incompatibility with bcrypt 4.0+
 if not hasattr(bcrypt, "__about__"):
     bcrypt.__about__ = bcrypt
