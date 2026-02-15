@@ -1,0 +1,25 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"openapi":"3.1.0","info":{"title":"CSAT Backend","version":"0.1.0"},"paths":{"/api/v1/login/access
+                    -token":{"post":{"tags":["login"],"summary":"Login Access Token","description":"OAuth2 compatible 
+                    tok...
+RawContent        : HTTP/1.1 200 OK
+                    Content-Length: 10043
+                    Content-Type: application/json
+                    Date: Fri, 13 Feb 2026 18:07:26 GMT
+                    Server: uvicorn
+                    
+                    {"openapi":"3.1.0","info":{"title":"CSAT Backend","version":"0.1.0"},"pa...
+Forms             : {}
+Headers           : {[Content-Length, 10043], [Content-Type, application/json], [Date, Fri, 13 Feb 2026 18:07:26 GMT], 
+                    [Server, uvicorn]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 10043
+
+
+

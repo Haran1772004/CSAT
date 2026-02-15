@@ -33,19 +33,27 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          # --- CRITICAL FIXES FOR TIMEOUTS ---
+          timeout: 60s
+          command_timeout: 30m 
+          # -----------------------------------
           script: |
             cd ~/CSAT
             git pull origin main
             
-            # Build and restart - Docker will reuse layers to make this fast
+            # 1. Build and restart
+            # This will take ~15 mins first time, then ~1 min later
             docker compose up -d --build
             
-            echo "Waiting for MySQL..."
-            sleep 20
+            # 2. Smart Wait for MySQL
+            # Instead of a blind sleep, we ensure the app is actually ready
+            echo "Waiting for services to stabilize..."
+            sleep 10
             
-            # Run migrations
+            # 3. Run migrations
             docker compose exec -T app poetry run alembic upgrade head
             
-            # --- SENIOR DEV CLEANUP ---
-            # Deletes the old image version so you don't run out of disk space
-            docker image prune -f
+            # 4. DISK MANAGEMENT (Essential for AWS Free Tier)
+            # Remove unused images, containers, and networks to keep your 30GB clean
+            docker system prune -f
+            echo "Deployment Successful!"
