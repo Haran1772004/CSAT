@@ -7,37 +7,35 @@ services:
     restart: always
     depends_on:
       db:
-        condition: service_healthy # This tells Docker to wait for the healthcheck
+        condition: service_healthy
     env_file:
       - .env
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     networks:
       - csat_net
 
   db:
     image: mysql:8.0
     container_name: csat_db
-    command: --innodb-adaptive-hash-index=0 --innodb-buffer-pool-size=256M
+    # RAM Optimization for AWS Free Tier
+    command: --innodb-adaptive-hash-index=0 --innodb-buffer-pool-size=128M --performance_schema=OFF
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: csat
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3307:3306"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uuser", "-ppassword" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}" ]
       timeout: 5s
       retries: 10
-      start_period: 10s # Gives MySQL time to boot before checking
+      start_period: 20s
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - csat_net
+
   nginx:
     image: nginx:latest
     container_name: csat_nginx
