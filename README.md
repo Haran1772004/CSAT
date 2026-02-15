@@ -1,76 +1,78 @@
-# CSAT Backend System
+# ☕ Divine Coffee Intelligence (CSAT System)
 
-A production-ready, multi-tenant CSAT (Customer Satisfaction) backend built with FastAPI, SQLAlchemy, and AWS S3.
+A premium, production-ready Customer Satisfaction (CSAT) monitoring system tailored for **Divine Coffee Shop**. This system utilizes a "Sense & Respond" architecture to capture real-time customer signals via distributed sensors (feedback forms) and process them into actionable intelligence.
 
-## Tech Stack
-- **Framework**: FastAPI
-- **Database**: MySQL (SQLAlchemy + PyMySQL)
-- **Auth**: JWT (OAuth2PasswordBearer)
-- **Storage**: AWS S3 (via Boto3)
-- **DevOps**: Docker, Nginx, GitHub Actions
-- **Dep Management**: Poetry
+---
 
-## Features
-- **Admin**: Register, Login, Create Forms, View Analytics (Aggregated ratings).
-- **Public**: Submit feedback (Rate limited, Captures IP, Upload Screenshot).
-- **Security**: BCrypt hashing, Role-based access (Ownership), File validation.
+## 🛠️ Technical Stack
+- **Backend**: FastAPI (Python 3.10+), SQLAlchemy + MySQL, JWT Auth.
+- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Shadcn/UI.
+- **Infrastructure**: AWS S3 (Storage), Nginx (Reverse Proxy), Docker + Docker Compose.
+- **DevOps**: GitHub Actions (CI/CD), DuckDNS (Dynamic DNS).
 
-## Local Setup
+---
 
-### Prerequisites
-- Docker & Docker Compose
-- Poetry (optional, if running locally without Docker)
+## 🚀 The Divine Story: "Sense & Respond"
+The system is divided into two distinct portals:
+1. **Divine Control Hub**: An executive dashboard for managers to monitor service health, analyze 30/60/90 day trends, and track specific customer signals (mapped to `GET /api/v1/reports/`).
+2. **Customer Signal Portal**: A lightweight, public-facing interface for customers to report their experience with specific shop services (e.g., *Divine Barista Quality*).
 
-### Running with Docker (Recommended)
-1. **Clone the repo**
-   ```bash
-   git clone <repo-url>
-   cd csat-backend
-   ```
-2. **Environment Variables**
-   Copy `.env.example` to `.env` and fill in credentials.
-   ```bash
-   cp .env.example .env
-   ```
-3. **Build and Run**
-   ```bash
-   docker-compose up --build
-   ```
-   The API will be available at `http://localhost:80` (via Nginx) or `http://localhost:8000` (Direct).
+---
 
-### Running Manually
-1. **Install Dependencies**
-   ```bash
-   poetry install
-   ```
-2. **Run Migrations**
-   ```bash
-   poetry run alembic upgrade head
-   ```
-3. **Start Server**
-   ```bash
-   poetry run uvicorn app.main:app --reload
-   ```
+## 💻 Local Setup & Development
 
-## API Documentation
-Once running, visit:
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+### 1. Prerequisites
+- **Docker Desktop** (Required for the full stack).
+- **Node.js 20+** (If running frontend outside Docker).
+- **WSL2** (Recommended for Windows users).
 
-## Project Structure
+### 2. Quick Start (Docker)
+```bash
+# Clone the repository
+git clone <repo-url>
+cd csat-divine
+
+# Configure Environment
+cp .env.example .env
+
+# Launch the Hub
+docker-compose up --build
 ```
-app/
-├── api/             # API Endpoints & Dependencies
-├── core/            # Config, Security, Logging
-├── db/              # Database Session & Models
-├── models/          # SQLAlchemy Models
-├── schemas/         # Pydantic Schemas
-├── services/        # Business Logic (S3, etc)
-└── main.py          # Entry Point
+*   **Admin Hub**: `http://localhost:3000`
+*   **API Docs**: `http://localhost:8000/docs`
+
+---
+
+## ⚠️ Common Deployment Obstacles (Troubleshooting)
+
+### 🔴 Local/WSL Build Issues
+- **Path Conflicts**: If using Windows, avoid running `npm` commands directly on `/mnt/c/` paths. Always use the WSL home directory (`~/`) to avoid performance lags and permission errors.
+- **Node Modules & TSC**: If `npm run build` fails with `tsc` errors, ensure `typescript` is installed as a devDependency. If you see duplicate library warnings (e.g., `lucide-react`), check `package.json` for redundant entries.
+- **Port Conflicts**: Ensure ports `3000`, `8000`, and `3306` are not occupied by existing local services.
+
+### 🟡 EC2 & Production (Nginx)
+- **CORS Errors**: If the frontend cannot reach the backend on EC2, verify your `.env` has `BACKEND_CORS_ORIGINS=["http://apihari.duckdns.org", "https://apihari.duckdns.org"]`.
+- **Nginx Size Limits**: If screenshot uploads fail, ensure `client_max_body_size 20M;` is present in your Nginx config.
+- **DNS (DuckDNS)**: If the site is unreachable, verify your public IP in DuckDNS matches your EC2 instance and ensure Nginx `server_name` is set to your domain.
+
+---
+
+## 📂 Project Architecture
+```
+/
+├── app/                # FastAPI Backend Logic
+├── frontend/           # React + Vite Frontend
+│   ├── src/App.tsx     # The Divine Hub Dashboard
+│   └── src/services/   # API Layer & Mock Service
+├── docker/             # Nginx & Environment configs
+└── docker-compose.yml  # Multi-container orchestration
 ```
 
-## Deployment
-The project includes a GitHub Actions workflow `.github/workflows/deploy.yml` that:
-1. Lints the code.
-2. Runs tests (if enabled).
-3. Can be configured to deploy to AWS EC2 via SSH.
+## 🔐 Security & Operations
+- **Data Integrity**: Passwords hashed with BCrypt; tokens signed with JWT.
+- **Storage**: Customer screenshots are streamed directly to AWS S3.
+- **IP Tracking**: Every submission captures the respondent's IP to prevent signal spam.
+
+---
+
+*Designed for high-performance service monitoring. Stay Divine.*
