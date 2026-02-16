@@ -3,6 +3,8 @@ name: CSAT Backend CI/CD
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'frontend/**'
 
 jobs:
   test:

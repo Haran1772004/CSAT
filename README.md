@@ -1,78 +1,98 @@
-# ☕ Divine Coffee Intelligence (CSAT System)
+# CSAT Backend - Customer Satisfaction System
 
-A premium, production-ready Customer Satisfaction (CSAT) monitoring system tailored for **Divine Coffee Shop**. This system utilizes a "Sense & Respond" architecture to capture real-time customer signals via distributed sensors (feedback forms) and process them into actionable intelligence.
+A high-performance Customer Satisfaction (CSAT) backend powered by **FastAPI**. This system is designed to capture, process, and analyze customer feedback signals in real-time using a "Sense & Respond" architecture.
+
+---
+
+## 🚀 Core Features
+
+- **Multi-Tenant Architecture**: Securely manage multiple forms and organizations with distinct ownership.
+- **Real-time Signal Capture**: Distributed feedback collection with automated IP tracking and rate limiting.
+- **Active Analytics**: Integrated processing for 30, 60, and 90-day sentiment trends and distribution analysis.
+- **Automated Media Handling**: Direct streaming of customer screenshots to **AWS S3** for secure storage.
+- **Data Intelligence**: Exportable feedback data in Excel format (Bulk & Single) for deep offline analysis.
+- **Enterprise Security**: JWT-based authentication with BCrypt password hashing and robust CORS protection.
 
 ---
 
 ## 🛠️ Technical Stack
-- **Backend**: FastAPI (Python 3.10+), SQLAlchemy + MySQL, JWT Auth.
-- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Shadcn/UI.
-- **Infrastructure**: AWS S3 (Storage), Nginx (Reverse Proxy), Docker + Docker Compose.
-- **DevOps**: GitHub Actions (CI/CD), DuckDNS (Dynamic DNS).
+
+- **Framework**: FastAPI (Python 3.10+)
+- **Database**: SQLAlchemy + MySQL 8.0
+- **Migrations**: Alembic
+- **Auth**: JWT (OAuth2) + BCrypt
+- **Cloud Storage**: AWS S3 (via Boto3)
+- **Rate Limiting**: SlowAPI
+- **Data Processing**: Pandas + OpenPyXL
+- **Containerization**: Docker & Docker Compose
 
 ---
 
-## 🚀 The Divine Story: "Sense & Respond"
-The system is divided into two distinct portals:
-1. **Divine Control Hub**: An executive dashboard for managers to monitor service health, analyze 30/60/90 day trends, and track specific customer signals (mapped to `GET /api/v1/reports/`).
-2. **Customer Signal Portal**: A lightweight, public-facing interface for customers to report their experience with specific shop services (e.g., *Divine Barista Quality*).
+## 📡 API Endpoints
+
+The API is versioned under `/api/v1/`. Full interactive documentation is available at `/docs` when running locally.
+
+### Authentication
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/auth/register` | Register a new administrator account |
+| `POST` | `/auth/login/access-token` | Obtain JWT access token (OAuth2) |
+
+### Form Management
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/forms/` | Create a new CSAT feedback form |
+| `GET` | `/forms/` | List all forms owned by the current user |
+| `GET` | `/forms/{id}` | Get detailed configuration for a specific form |
+
+### Submissions & Feedback
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/submit/{form_id}` | **Public**: Submit customer feedback (supports rating, text, and screenshot) |
+| `GET` | `/forms/{form_id}/submissions` | List all submissions for a specific form (Owner only) |
+| `GET` | `/submissions/{id}` | View a single submission detail |
+
+### Data Export & Analytics
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/reports/{form_id}/analytics` | Get 30/60/90 day trends and rating distribution |
+| `GET` | `/submissions/{id}/download` | Download a single submission as Excel |
+| `GET` | `/forms/{form_id}/download/bulk` | Download all form submissions as a bulk Excel report |
+
+### System Utility
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/health` | Check API service and CI/CD status |
 
 ---
 
-## 💻 Local Setup & Development
+## 💻 Setup & Execution
 
 ### 1. Prerequisites
-- **Docker Desktop** (Required for the full stack).
-- **Node.js 20+** (If running frontend outside Docker).
-- **WSL2** (Recommended for Windows users).
+- **Docker & Docker Compose**
+- **AWS S3 Credentials** (configured in `.env`)
 
-### 2. Quick Start (Docker)
+### 2. Configuration
+Copy the template environment file and update with your credentials:
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd csat-divine
-
-# Configure Environment
 cp .env.example .env
+```
 
-# Launch the Hub
+### 3. Launch with Docker
+The system uses `docker-compose` to orchestrate the FastAPI app, MySQL database, and Nginx reverse proxy.
+```bash
+# Build and start all services
 docker-compose up --build
 ```
-*   **Admin Hub**: `http://localhost:3000`
 *   **API Docs**: `http://localhost:8000/docs`
+*   **Health Check**: `http://localhost:8000/health`
 
----
-
-## ⚠️ Common Deployment Obstacles (Troubleshooting)
-
-### 🔴 Local/WSL Build Issues
-- **Path Conflicts**: If using Windows, avoid running `npm` commands directly on `/mnt/c/` paths. Always use the WSL home directory (`~/`) to avoid performance lags and permission errors.
-- **Node Modules & TSC**: If `npm run build` fails with `tsc` errors, ensure `typescript` is installed as a devDependency. If you see duplicate library warnings (e.g., `lucide-react`), check `package.json` for redundant entries.
-- **Port Conflicts**: Ensure ports `3000`, `8000`, and `3306` are not occupied by existing local services.
-
-### 🟡 EC2 & Production (Nginx)
-- **CORS Errors**: If the frontend cannot reach the backend on EC2, verify your `.env` has `BACKEND_CORS_ORIGINS=["http://apihari.duckdns.org", "https://apihari.duckdns.org"]`.
-- **Nginx Size Limits**: If screenshot uploads fail, ensure `client_max_body_size 20M;` is present in your Nginx config.
-- **DNS (DuckDNS)**: If the site is unreachable, verify your public IP in DuckDNS matches your EC2 instance and ensure Nginx `server_name` is set to your domain.
-
----
-
-## 📂 Project Architecture
-```
-/
-├── app/                # FastAPI Backend Logic
-├── frontend/           # React + Vite Frontend
-│   ├── src/App.tsx     # The Divine Hub Dashboard
-│   └── src/services/   # API Layer & Mock Service
-├── docker/             # Nginx & Environment configs
-└── docker-compose.yml  # Multi-container orchestration
+### 4. Database Migrations
+Migrations are handled automatically by the startup script (`scripts/start.sh`) inside the container using Alembic:
+```bash
+alembic upgrade head
 ```
 
-## 🔐 Security & Operations
-- **Data Integrity**: Passwords hashed with BCrypt; tokens signed with JWT.
-- **Storage**: Customer screenshots are streamed directly to AWS S3.
-- **IP Tracking**: Every submission captures the respondent's IP to prevent signal spam.
-
 ---
 
-*Designed for high-performance service monitoring. Stay Divine.*
+*Designed for high-performance service monitoring.*
